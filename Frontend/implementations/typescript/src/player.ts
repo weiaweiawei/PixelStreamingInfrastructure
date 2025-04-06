@@ -17,6 +17,7 @@ document.body.onload = function() {
 
 	// Create a config object
 	const config = new Config({ useUrlParams: true });
+	console.log("pixelstream配置", config);
 
 	// Create a Native DOM delegate instance that implements the Delegate interface class
 	const stream = new PixelStreaming(config);

@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import {
     Config,
     AllSettings,
@@ -11,9 +11,15 @@ export interface PixelStreamingWrapperProps {
     initialSettings?: Partial<AllSettings>;
 }
 
-export const PixelStreamingWrapper = ({
+// 为组件定义可以通过ref访问的方法接口
+export interface PixelStreamingWrapperRef {
+    emitUIInteraction: (data: any) => void;
+    getPixelStreaming: () => PixelStreaming | undefined;
+}
+
+export const PixelStreamingWrapper = forwardRef<PixelStreamingWrapperRef, PixelStreamingWrapperProps>(({
     initialSettings
-}: PixelStreamingWrapperProps) => {
+}, ref) => {
     // A reference to parent div element that the Pixel Streaming library attaches into:
     const videoParent = useRef<HTMLDivElement>(null);
 
@@ -22,6 +28,18 @@ export const PixelStreamingWrapper = ({
     
     // A boolean state variable that determines if the Click to play overlay is shown:
     const [clickToPlayVisible, setClickToPlayVisible] = useState(false);
+
+    // 将组件内部的方法暴露给ref
+    useImperativeHandle(ref, () => ({
+        emitUIInteraction: (data) => {
+            if (pixelStreaming) {
+                console.log('向UE发送消息', data);
+                console.log('pixelStreaming', pixelStreaming.emitUIInteraction);
+                pixelStreaming.emitUIInteraction(data);
+            }
+        },
+        getPixelStreaming: () => pixelStreaming
+    }), [pixelStreaming]);
 
     // Run on component mount:
     useEffect(() => {
@@ -87,4 +105,4 @@ export const PixelStreamingWrapper = ({
             )}
         </div>
     );
-};
+});
